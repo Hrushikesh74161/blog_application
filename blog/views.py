@@ -1,16 +1,28 @@
 from django.core.mail import send_mail
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic import DetailView, ListView
+from taggit.models import Tag
 
 from .forms import CommentForm, EmailPostForm
 from .models import Comment, Post
 
 
-class BlogListView(ListView):
-    queryset = Post.published.all()
-    template_name = 'blog/post/blog_list.html'
-    context_object_name = 'posts'
-    paginate_by = 2
+def post_list(request):
+    obj_list = Post.published.all()
+    paginator = Paginator(obj_list, 5)
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        # if page no is not a integer deliver the first page
+        posts = paginator.page(1)
+    except EmptyPage:
+        # if page no is out of range deliver last page
+        posts = paginator.page(paginator.num_pages)
+    tag = 0  # all items not tagged, see posts_with_tag function and blog_list.html file
+    return render(request, 'blog/post/blog_list.html', {'posts': posts, 'tag': tag, 'page': page})
 
 
 def post_detail(request, pk):
@@ -48,3 +60,20 @@ def post_share(request, pk):
         form = EmailPostForm()
         
     return render(request, 'blog/post/post_share.html', {'post': post, 'form': form, 'sent': sent})
+
+
+def posts_with_tag(request, tag_id):
+    tag_item = Tag.objects.get(id=tag_id)
+    obj_list = Post.objects.filter(tags=tag_item)
+    paginator = Paginator(obj_list, 5)
+    page = request.GET.get('page')
+    try:
+        posts = paginator.page(page)
+    except PageNotAnInteger:
+        # if page no is not a integer deliver the first page
+        posts = paginator.page(1)
+    except EmptyPage:
+        # if page no is out of range deliver last page
+        posts = paginator.page(paginator.num_pages)
+    tag = 1  # tagged items
+    return render(request, 'blog/post/blog_list.html', {'posts': posts, 'tag_item': tag_item, 'tag': tag})

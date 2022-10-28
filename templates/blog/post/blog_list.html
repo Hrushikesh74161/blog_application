@@ -4,10 +4,20 @@
 {% block title %}Blog{% endblock title %}
 
 {% block content %}
+{% if tag %}
+<h3>Posts with tag: {{tag_item}}</h3>
+{% endif %}
 {% for post in posts %}
 <h2><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+<span>
+    <p>Tags: 
+        {% for tag in post.tags.all %}
+        <a href="{% url 'blog:tagged_posts' tag.id %}">{{tag}}</a>
+        {% endfor %}
+    </p>
+</span>
 <p>{{ post.body|truncatewords:30|linebreaks }}</p>
 <p>Published by {{ post.author }} on {{ post.publish }}</p>
 {% endfor %}
-{% include 'pagination.html' with page=page_obj %}
+{% include 'pagination.html' with page=posts %}
 {% endblock content %}

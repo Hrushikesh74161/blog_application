@@ -1,5 +1,13 @@
 from django.contrib import admin
-from .models import Post, Comment
+from django.contrib.admin import TabularInline
+from taggit.models import Tag
+
+from .models import Comment, Post
+
+
+class CommentInline(TabularInline):
+    model = Comment
+    fields = ['name', 'body', 'active']
 
 
 @admin.register(Post)
@@ -10,6 +18,9 @@ class PostAdmin(admin.ModelAdmin):
     date_hierarchy = 'publish'
     ordering = ['status', 'publish',]
     raw_id_fields = ['author',]
+    inlines = [
+        CommentInline,
+    ]
 
 
 @admin.register(Comment)

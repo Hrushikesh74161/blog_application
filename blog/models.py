@@ -5,11 +5,18 @@ from django.db import models
 from django.urls import reverse
 from django.utils import timezone
 from taggit.managers import TaggableManager
+from taggit.models import GenericUUIDTaggedItemBase, Tag, TaggedItemBase
 
 
 class PublishedManager(models.Manager):
     def get_queryset(self):
         return super(PublishedManager, self).get_queryset().filter(status='published')
+
+
+class UUIDTaggedItem(GenericUUIDTaggedItemBase, TaggedItemBase):
+    class Meta:
+        verbose_name = 'Tag'
+        verbose_name_plural = 'Tags'
 
 
 class Post(models.Model):
@@ -27,6 +34,7 @@ class Post(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='draft')
     objects = models.Manager()  # default manager
     published = PublishedManager()  # our custom manager
+    tags = TaggableManager(through=UUIDTaggedItem, blank=True)
 
     def get_absolute_url(self):
         return reverse('blog:blog_detail', args=[str(self.pk)])
@@ -36,7 +44,7 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
-        
+
 
 class Comment(models.Model):
     post = models.ForeignKey(
