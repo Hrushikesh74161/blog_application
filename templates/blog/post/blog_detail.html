@@ -22,4 +22,12 @@
     <p>{{comment.body|linebreaks}} -- {{comment.name}}</p>
     {% endfor %}
 </div>
+<div class="Similar-posts">
+    <h2>Similar Posts:</h2>
+    {% for post in similar_posts %}
+    <p><a href="{{post.get_absolute_url}}">{{post.title}}</a></p>
+    {% empty %}
+    <p>There are no similar posts.</p>
+    {% endfor %}
+</div>
 {% endblock content %}
