@@ -1,8 +1,10 @@
 {% extends 'blog/_base.html' %}
+{% load blog_tags %}
 {% load static %}
 
 {% block title %}Blog{% endblock title %}
 
+{% total_no_of_posts %}
 {% block content %}
 {% if tag %}
 <h3>Posts with tag: {{tag_item}}</h3>
